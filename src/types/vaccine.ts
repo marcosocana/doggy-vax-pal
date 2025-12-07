@@ -4,7 +4,8 @@ export type VaccineType = 'core' | 'non_core' | 'optional' | 'deworming' | 'othe
 
 export interface Vaccine {
   id: string;
-  user_id: string;
+  dog_id: string | null;
+  user_id: string | null;
   name: string;
   description: string | null;
   date: string;

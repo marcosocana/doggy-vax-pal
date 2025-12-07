@@ -14,11 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      dogs: {
+        Row: {
+          birth_date: string | null
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          birth_date?: string | null
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          birth_date?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       vaccines: {
         Row: {
           created_at: string
           date: string
           description: string | null
+          dog_id: string | null
           id: string
           is_repeatable: boolean
           name: string
@@ -28,13 +50,14 @@ export type Database = {
             | null
           status: Database["public"]["Enums"]["vaccine_status"]
           updated_at: string
-          user_id: string
+          user_id: string | null
           vaccine_type: Database["public"]["Enums"]["vaccine_type"]
         }
         Insert: {
           created_at?: string
           date: string
           description?: string | null
+          dog_id?: string | null
           id?: string
           is_repeatable?: boolean
           name: string
@@ -44,13 +67,14 @@ export type Database = {
             | null
           status?: Database["public"]["Enums"]["vaccine_status"]
           updated_at?: string
-          user_id: string
+          user_id?: string | null
           vaccine_type?: Database["public"]["Enums"]["vaccine_type"]
         }
         Update: {
           created_at?: string
           date?: string
           description?: string | null
+          dog_id?: string | null
           id?: string
           is_repeatable?: boolean
           name?: string
@@ -60,10 +84,18 @@ export type Database = {
             | null
           status?: Database["public"]["Enums"]["vaccine_status"]
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
           vaccine_type?: Database["public"]["Enums"]["vaccine_type"]
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "vaccines_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
