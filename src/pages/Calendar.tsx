@@ -1,0 +1,126 @@
+import { useState } from 'react';
+import { Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { CalendarHeader } from '@/components/CalendarHeader';
+import { CalendarGrid } from '@/components/CalendarGrid';
+import { VaccineList } from '@/components/VaccineList';
+import { VaccineForm } from '@/components/VaccineForm';
+import { VaccineDetail } from '@/components/VaccineDetail';
+import { useVaccines } from '@/hooks/useVaccines';
+import { Vaccine, VaccineFormData } from '@/types/vaccine';
+import { Skeleton } from '@/components/ui/skeleton';
+
+export default function Calendar() {
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedVaccine, setSelectedVaccine] = useState<Vaccine | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [editingVaccine, setEditingVaccine] = useState<Vaccine | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+
+  const { vaccines, isLoading, createVaccine, updateVaccine, deleteVaccine } = useVaccines();
+
+  const handleDayClick = (date: Date) => {
+    setSelectedDate(date);
+    setEditingVaccine(null);
+    setIsFormOpen(true);
+  };
+
+  const handleVaccineClick = (vaccine: Vaccine) => {
+    setSelectedVaccine(vaccine);
+    setIsDetailOpen(true);
+  };
+
+  const handleEditVaccine = () => {
+    setEditingVaccine(selectedVaccine);
+    setIsDetailOpen(false);
+    setIsFormOpen(true);
+  };
+
+  const handleDeleteVaccine = () => {
+    if (selectedVaccine) {
+      deleteVaccine.mutate(selectedVaccine.id);
+      setIsDetailOpen(false);
+      setSelectedVaccine(null);
+    }
+  };
+
+  const handleFormSubmit = (data: VaccineFormData) => {
+    if (editingVaccine) {
+      updateVaccine.mutate({ id: editingVaccine.id, vaccine: data });
+    } else {
+      createVaccine.mutate(data);
+    }
+    setEditingVaccine(null);
+    setSelectedDate(undefined);
+  };
+
+  const handleFormClose = () => {
+    setIsFormOpen(false);
+    setEditingVaccine(null);
+    setSelectedDate(undefined);
+  };
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <CalendarHeader currentDate={currentDate} onNavigate={setCurrentDate} />
+      
+      {/* Calendar Grid */}
+      <CalendarGrid 
+        currentDate={currentDate} 
+        vaccines={vaccines}
+        onDayClick={handleDayClick}
+      />
+
+      {/* Divider */}
+      <div className="h-2 bg-muted" />
+
+      {/* Vaccine List */}
+      {isLoading ? (
+        <div className="px-4 py-6 space-y-4">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-24 w-full rounded-xl" />
+          <Skeleton className="h-24 w-full rounded-xl" />
+        </div>
+      ) : (
+        <VaccineList 
+          currentDate={currentDate}
+          vaccines={vaccines}
+          onVaccineClick={handleVaccineClick}
+        />
+      )}
+
+      {/* FAB */}
+      <Button
+        variant="floating"
+        size="fab"
+        onClick={() => {
+          setEditingVaccine(null);
+          setSelectedDate(undefined);
+          setIsFormOpen(true);
+        }}
+        className="fixed bottom-6 right-6 z-20"
+      >
+        <Plus className="w-6 h-6" />
+      </Button>
+
+      {/* Form Sheet */}
+      <VaccineForm
+        isOpen={isFormOpen}
+        onClose={handleFormClose}
+        onSubmit={handleFormSubmit}
+        vaccine={editingVaccine}
+        selectedDate={selectedDate}
+      />
+
+      {/* Detail Sheet */}
+      <VaccineDetail
+        vaccine={selectedVaccine}
+        isOpen={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
+        onEdit={handleEditVaccine}
+        onDelete={handleDeleteVaccine}
+      />
+    </div>
+  );
+}
