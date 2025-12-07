@@ -1,21 +1,33 @@
 import { format, addMonths, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Dog, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
+import { Dog as DogType } from '@/types/dog';
 
 interface CalendarHeaderProps {
   currentDate: Date;
   onNavigate: (date: Date) => void;
+  dog: DogType;
+  onChangeDog: () => void;
 }
 
-export function CalendarHeader({ currentDate, onNavigate }: CalendarHeaderProps) {
-  const { signOut } = useAuth();
-  
+export function CalendarHeader({ currentDate, onNavigate, dog, onChangeDog }: CalendarHeaderProps) {
   const monthYear = format(currentDate, "MMMM yyyy", { locale: es });
 
   return (
     <header className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border/50">
+      {/* Dog info bar */}
+      <div className="flex items-center gap-3 px-4 py-2 bg-primary/5 border-b border-border/30">
+        <Button variant="ghost" size="icon" onClick={onChangeDog} className="h-8 w-8">
+          <ArrowLeft className="w-4 h-4" />
+        </Button>
+        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+          <Dog className="w-4 h-4 text-primary" />
+        </div>
+        <span className="font-semibold text-sm">{dog.name}</span>
+      </div>
+
+      {/* Month navigation */}
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-1">
           <Button
@@ -41,24 +53,14 @@ export function CalendarHeader({ currentDate, onNavigate }: CalendarHeaderProps)
           </Button>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onNavigate(new Date())}
-            className="text-primary font-semibold"
-          >
-            Hoy
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={signOut}
-            className="h-9 w-9 text-muted-foreground hover:text-destructive"
-          >
-            <LogOut className="w-4 h-4" />
-          </Button>
-        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onNavigate(new Date())}
+          className="text-primary font-semibold"
+        >
+          Hoy
+        </Button>
       </div>
     </header>
   );

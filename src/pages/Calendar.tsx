@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CalendarHeader } from '@/components/CalendarHeader';
@@ -6,9 +6,13 @@ import { CalendarGrid } from '@/components/CalendarGrid';
 import { VaccineList } from '@/components/VaccineList';
 import { VaccineForm } from '@/components/VaccineForm';
 import { VaccineDetail } from '@/components/VaccineDetail';
+import { DogSelector } from '@/components/DogSelector';
 import { useVaccines } from '@/hooks/useVaccines';
 import { Vaccine, VaccineFormData } from '@/types/vaccine';
+import { Dog } from '@/types/dog';
 import { Skeleton } from '@/components/ui/skeleton';
+
+const SELECTED_DOG_KEY = 'vacunaspet_selected_dog';
 
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -17,8 +21,31 @@ export default function Calendar() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [editingVaccine, setEditingVaccine] = useState<Vaccine | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [selectedDog, setSelectedDog] = useState<Dog | null>(null);
 
-  const { vaccines, isLoading, createVaccine, updateVaccine, deleteVaccine } = useVaccines();
+  // Load selected dog from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(SELECTED_DOG_KEY);
+    if (saved) {
+      try {
+        setSelectedDog(JSON.parse(saved));
+      } catch {
+        localStorage.removeItem(SELECTED_DOG_KEY);
+      }
+    }
+  }, []);
+
+  const { vaccines, isLoading, createVaccine, updateVaccine, deleteVaccine } = useVaccines(selectedDog?.id ?? null);
+
+  const handleSelectDog = (dog: Dog) => {
+    setSelectedDog(dog);
+    localStorage.setItem(SELECTED_DOG_KEY, JSON.stringify(dog));
+  };
+
+  const handleChangeDog = () => {
+    setSelectedDog(null);
+    localStorage.removeItem(SELECTED_DOG_KEY);
+  };
 
   const handleDayClick = (date: Date) => {
     setSelectedDate(date);
@@ -61,9 +88,19 @@ export default function Calendar() {
     setSelectedDate(undefined);
   };
 
+  // Show dog selector if no dog selected
+  if (!selectedDog) {
+    return <DogSelector onSelectDog={handleSelectDog} />;
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <CalendarHeader currentDate={currentDate} onNavigate={setCurrentDate} />
+      <CalendarHeader 
+        currentDate={currentDate} 
+        onNavigate={setCurrentDate}
+        dog={selectedDog}
+        onChangeDog={handleChangeDog}
+      />
       
       {/* Calendar Grid */}
       <CalendarGrid 

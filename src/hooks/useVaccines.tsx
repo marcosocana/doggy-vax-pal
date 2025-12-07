@@ -1,37 +1,35 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Vaccine, VaccineFormData } from '@/types/vaccine';
-import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 
-export function useVaccines() {
-  const { user } = useAuth();
+export function useVaccines(dogId: string | null) {
   const queryClient = useQueryClient();
 
   const { data: vaccines = [], isLoading, error } = useQuery({
-    queryKey: ['vaccines', user?.id],
+    queryKey: ['vaccines', dogId],
     queryFn: async () => {
-      if (!user) return [];
+      if (!dogId) return [];
       
       const { data, error } = await supabase
         .from('vaccines')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('dog_id', dogId)
         .order('date', { ascending: true });
 
       if (error) throw error;
       return data as Vaccine[];
     },
-    enabled: !!user,
+    enabled: !!dogId,
   });
 
   const createVaccine = useMutation({
     mutationFn: async (vaccine: VaccineFormData) => {
-      if (!user) throw new Error('No user');
+      if (!dogId) throw new Error('No dog selected');
       
       const { data, error } = await supabase
         .from('vaccines')
-        .insert([{ ...vaccine, user_id: user.id }])
+        .insert([{ ...vaccine, dog_id: dogId }])
         .select()
         .single();
 
