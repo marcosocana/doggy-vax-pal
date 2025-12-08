@@ -23,7 +23,12 @@ export function useDogs() {
     mutationFn: async (dog: DogFormData) => {
       const { data, error } = await supabase
         .from('dogs')
-        .insert([dog])
+        .insert([{
+          name: dog.name,
+          birth_date: dog.birth_date,
+          password: dog.password,
+          photo_url: dog.photo_url || null,
+        }])
         .select()
         .single();
 

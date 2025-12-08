@@ -21,8 +21,12 @@ export function CalendarHeader({ currentDate, onNavigate, dog, onChangeDog }: Ca
         <Button variant="ghost" size="icon" onClick={onChangeDog} className="h-8 w-8">
           <ArrowLeft className="w-4 h-4" />
         </Button>
-        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-          <Dog className="w-4 h-4 text-primary" />
+        <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden bg-primary/10">
+          {dog.photo_url ? (
+            <img src={dog.photo_url} alt={dog.name} className="w-full h-full object-cover" />
+          ) : (
+            <Dog className="w-4 h-4 text-primary" />
+          )}
         </div>
         <span className="font-semibold text-sm">{dog.name}</span>
       </div>

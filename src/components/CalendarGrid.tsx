@@ -8,7 +8,9 @@ import {
   format, 
   isSameMonth, 
   isSameDay, 
-  isToday 
+  isToday,
+  isPast,
+  startOfDay
 } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Vaccine } from '@/types/vaccine';
@@ -58,6 +60,7 @@ export function CalendarGrid({ currentDate, vaccines, onDayClick }: CalendarGrid
           const dayVaccines = getVaccinesForDay(day);
           const isCurrentMonth = isSameMonth(day, currentDate);
           const isTodayDate = isToday(day);
+          const isPastDay = isPast(startOfDay(day)) && !isTodayDate;
 
           return (
             <button
@@ -68,6 +71,7 @@ export function CalendarGrid({ currentDate, vaccines, onDayClick }: CalendarGrid
                 isCurrentMonth ? 'text-foreground' : 'text-muted-foreground/40',
                 isTodayDate && 'bg-primary/10 ring-2 ring-primary',
                 !isTodayDate && isCurrentMonth && 'hover:bg-muted',
+                isPastDay && isCurrentMonth && 'opacity-40',
               )}
             >
               <span className={cn(
@@ -77,17 +81,20 @@ export function CalendarGrid({ currentDate, vaccines, onDayClick }: CalendarGrid
                 {format(day, 'd')}
               </span>
               
-              {/* Vaccine indicators */}
+              {/* Vaccine indicators - more prominent */}
               {dayVaccines.length > 0 && (
                 <div className="flex flex-wrap gap-0.5 justify-center mt-0.5">
                   {dayVaccines.slice(0, 3).map((vaccine) => (
                     <div
                       key={vaccine.id}
-                      className={cn('w-1.5 h-1.5 rounded-full', typeColors[vaccine.vaccine_type])}
+                      className={cn(
+                        'w-2.5 h-2.5 rounded-full shadow-md ring-1 ring-white/50 animate-pulse',
+                        typeColors[vaccine.vaccine_type]
+                      )}
                     />
                   ))}
                   {dayVaccines.length > 3 && (
-                    <span className="text-[8px] text-muted-foreground">+{dayVaccines.length - 3}</span>
+                    <span className="text-[8px] font-bold text-primary">+{dayVaccines.length - 3}</span>
                   )}
                 </div>
               )}
