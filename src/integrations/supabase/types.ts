@@ -20,18 +20,24 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          password: string
+          photo_url: string | null
         }
         Insert: {
           birth_date?: string | null
           created_at?: string
           id?: string
           name: string
+          password?: string
+          photo_url?: string | null
         }
         Update: {
           birth_date?: string | null
           created_at?: string
           id?: string
           name?: string
+          password?: string
+          photo_url?: string | null
         }
         Relationships: []
       }
