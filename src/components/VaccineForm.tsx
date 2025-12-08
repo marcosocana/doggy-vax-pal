@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,7 +23,6 @@ interface VaccineFormProps {
   onClose: () => void;
   onSubmit: (data: VaccineFormData) => void;
   vaccine?: Vaccine | null;
-  selectedDate?: Date;
 }
 
 const defaultFormData: VaccineFormData = {
@@ -38,7 +36,7 @@ const defaultFormData: VaccineFormData = {
   vaccine_type: 'other',
 };
 
-export function VaccineForm({ isOpen, onClose, onSubmit, vaccine, selectedDate }: VaccineFormProps) {
+export function VaccineForm({ isOpen, onClose, onSubmit, vaccine }: VaccineFormProps) {
   const [formData, setFormData] = useState<VaccineFormData>(defaultFormData);
 
   useEffect(() => {
@@ -53,15 +51,10 @@ export function VaccineForm({ isOpen, onClose, onSubmit, vaccine, selectedDate }
         status: vaccine.status,
         vaccine_type: vaccine.vaccine_type,
       });
-    } else if (selectedDate) {
-      setFormData({
-        ...defaultFormData,
-        date: format(selectedDate, 'yyyy-MM-dd'),
-      });
     } else {
       setFormData(defaultFormData);
     }
-  }, [vaccine, selectedDate, isOpen]);
+  }, [vaccine, isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,14 +66,9 @@ export function VaccineForm({ isOpen, onClose, onSubmit, vaccine, selectedDate }
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent side="bottom" className="h-[90vh] rounded-t-3xl">
         <SheetHeader className="text-left pb-4">
-          <div className="flex items-center justify-between">
-            <SheetTitle className="text-xl font-bold">
-              {vaccine ? 'Editar Vacuna' : 'Nueva Vacuna'}
-            </SheetTitle>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="w-5 h-5" />
-            </Button>
-          </div>
+          <SheetTitle className="text-xl font-bold">
+            {vaccine ? 'Editar Vacuna' : 'Nueva Vacuna'}
+          </SheetTitle>
         </SheetHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 overflow-y-auto max-h-[calc(90vh-120px)] pb-6">

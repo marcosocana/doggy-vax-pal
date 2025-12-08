@@ -6,6 +6,7 @@ import { CalendarGrid } from '@/components/CalendarGrid';
 import { VaccineList } from '@/components/VaccineList';
 import { VaccineForm } from '@/components/VaccineForm';
 import { VaccineDetail } from '@/components/VaccineDetail';
+import { DayVaccinesSheet } from '@/components/DayVaccinesSheet';
 import { DogSelector } from '@/components/DogSelector';
 import { useVaccines } from '@/hooks/useVaccines';
 import { Vaccine, VaccineFormData } from '@/types/vaccine';
@@ -19,8 +20,9 @@ export default function Calendar() {
   const [selectedVaccine, setSelectedVaccine] = useState<Vaccine | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isDaySheetOpen, setIsDaySheetOpen] = useState(false);
   const [editingVaccine, setEditingVaccine] = useState<Vaccine | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedDog, setSelectedDog] = useState<Dog | null>(null);
 
   // Load selected dog from localStorage
@@ -49,8 +51,7 @@ export default function Calendar() {
 
   const handleDayClick = (date: Date) => {
     setSelectedDate(date);
-    setEditingVaccine(null);
-    setIsFormOpen(true);
+    setIsDaySheetOpen(true);
   };
 
   const handleVaccineClick = (vaccine: Vaccine) => {
@@ -85,7 +86,6 @@ export default function Calendar() {
   const handleFormClose = () => {
     setIsFormOpen(false);
     setEditingVaccine(null);
-    setSelectedDate(undefined);
   };
 
   // Show dog selector if no dog selected
@@ -141,13 +141,21 @@ export default function Calendar() {
         <Plus className="w-6 h-6" />
       </Button>
 
+      {/* Day Vaccines Sheet */}
+      <DayVaccinesSheet
+        isOpen={isDaySheetOpen}
+        onClose={() => setIsDaySheetOpen(false)}
+        selectedDate={selectedDate}
+        vaccines={vaccines}
+        onVaccineClick={handleVaccineClick}
+      />
+
       {/* Form Sheet */}
       <VaccineForm
         isOpen={isFormOpen}
         onClose={handleFormClose}
         onSubmit={handleFormSubmit}
         vaccine={editingVaccine}
-        selectedDate={selectedDate}
       />
 
       {/* Detail Sheet */}

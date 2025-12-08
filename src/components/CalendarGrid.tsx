@@ -22,13 +22,7 @@ interface CalendarGridProps {
   onDayClick: (date: Date) => void;
 }
 
-const typeColors = {
-  core: 'bg-vaccine-core',
-  non_core: 'bg-vaccine-non-core',
-  optional: 'bg-vaccine-optional',
-  deworming: 'bg-vaccine-deworming',
-  other: 'bg-vaccine-other',
-};
+// All vaccine indicators are now red for visibility
 
 export function CalendarGrid({ currentDate, vaccines, onDayClick }: CalendarGridProps) {
   const days = useMemo(() => {
@@ -70,7 +64,8 @@ export function CalendarGrid({ currentDate, vaccines, onDayClick }: CalendarGrid
                 'relative aspect-square flex flex-col items-center justify-start p-1 rounded-xl transition-all',
                 isCurrentMonth ? 'text-foreground' : 'text-muted-foreground/40',
                 isTodayDate && 'bg-primary/10 ring-2 ring-primary',
-                !isTodayDate && isCurrentMonth && 'hover:bg-muted',
+                !isTodayDate && isCurrentMonth && dayVaccines.length > 0 && 'bg-destructive/10',
+                !isTodayDate && isCurrentMonth && dayVaccines.length === 0 && 'hover:bg-muted',
                 isPastDay && isCurrentMonth && 'opacity-40',
               )}
             >
@@ -81,20 +76,17 @@ export function CalendarGrid({ currentDate, vaccines, onDayClick }: CalendarGrid
                 {format(day, 'd')}
               </span>
               
-              {/* Vaccine indicators - more prominent */}
+              {/* Vaccine indicators - red and prominent */}
               {dayVaccines.length > 0 && (
                 <div className="flex flex-wrap gap-0.5 justify-center mt-0.5">
                   {dayVaccines.slice(0, 3).map((vaccine) => (
                     <div
                       key={vaccine.id}
-                      className={cn(
-                        'w-2.5 h-2.5 rounded-full shadow-md ring-1 ring-white/50 animate-pulse',
-                        typeColors[vaccine.vaccine_type]
-                      )}
+                      className="w-2.5 h-2.5 rounded-full shadow-md ring-1 ring-white/50 animate-pulse bg-destructive"
                     />
                   ))}
                   {dayVaccines.length > 3 && (
-                    <span className="text-[8px] font-bold text-primary">+{dayVaccines.length - 3}</span>
+                    <span className="text-[8px] font-bold text-destructive">+{dayVaccines.length - 3}</span>
                   )}
                 </div>
               )}
