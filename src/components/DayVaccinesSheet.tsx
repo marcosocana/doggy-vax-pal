@@ -1,29 +1,28 @@
-import { format, isSameDay } from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { CalendarDays, Syringe } from 'lucide-react';
+import { CalendarDays, Plus, Syringe } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 import { VaccineCard } from '@/components/VaccineCard';
-import { Vaccine } from '@/types/vaccine';
+import { VaccineOccurrence } from '@/lib/vaccineOccurrences';
 
 interface DayVaccinesSheetProps {
   isOpen: boolean;
   onClose: () => void;
   selectedDate: Date | null;
-  vaccines: Vaccine[];
-  onVaccineClick: (vaccine: Vaccine) => void;
+  occurrences: VaccineOccurrence[];
+  onVaccineClick: (occurrence: VaccineOccurrence) => void;
+  onAddVaccine: () => void;
 }
 
 export function DayVaccinesSheet({ 
   isOpen, 
   onClose, 
   selectedDate, 
-  vaccines,
-  onVaccineClick 
+  occurrences,
+  onVaccineClick,
+  onAddVaccine 
 }: DayVaccinesSheetProps) {
-  const dayVaccines = selectedDate 
-    ? vaccines.filter(v => isSameDay(new Date(v.date), selectedDate))
-    : [];
-
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent side="bottom" className="h-auto max-h-[70vh] rounded-t-3xl">
@@ -35,19 +34,24 @@ export function DayVaccinesSheet({
         </SheetHeader>
 
         <div className="overflow-y-auto max-h-[calc(70vh-100px)] pb-6">
-          {dayVaccines.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-              <Syringe className="w-12 h-12 mb-3 opacity-30" />
-              <p className="text-sm">No hay vacunas este día</p>
+          {occurrences.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8">
+              <Syringe className="w-12 h-12 mb-3 opacity-30 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground mb-4">No hay vacunas este día</p>
+              <Button onClick={onAddVaccine} variant="outline" className="gap-2">
+                <Plus className="w-4 h-4" />
+                Añadir vacuna
+              </Button>
             </div>
           ) : (
             <div className="space-y-3">
-              {dayVaccines.map((vaccine) => (
+              {occurrences.map((occurrence, index) => (
                 <VaccineCard 
-                  key={vaccine.id} 
-                  vaccine={vaccine} 
+                  key={`${occurrence.vaccine.id}-${index}`}
+                  vaccine={occurrence.vaccine}
+                  isRepeatedOccurrence={!occurrence.isOriginal}
                   onClick={() => {
-                    onVaccineClick(vaccine);
+                    onVaccineClick(occurrence);
                     onClose();
                   }} 
                 />

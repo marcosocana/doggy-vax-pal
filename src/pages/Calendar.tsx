@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { format } from 'date-fns';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CalendarHeader } from '@/components/CalendarHeader';
@@ -8,22 +9,27 @@ import { VaccineForm } from '@/components/VaccineForm';
 import { VaccineDetail } from '@/components/VaccineDetail';
 import { DayVaccinesSheet } from '@/components/DayVaccinesSheet';
 import { DogSelector } from '@/components/DogSelector';
+import { EditSeriesDialog } from '@/components/EditSeriesDialog';
 import { useVaccines } from '@/hooks/useVaccines';
 import { Vaccine, VaccineFormData } from '@/types/vaccine';
 import { Dog } from '@/types/dog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { calculateVaccineOccurrences, getOccurrencesForDay, VaccineOccurrence } from '@/lib/vaccineOccurrences';
 
 const SELECTED_DOG_KEY = 'vacunaspet_selected_dog';
 
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedVaccine, setSelectedVaccine] = useState<Vaccine | null>(null);
+  const [selectedOccurrence, setSelectedOccurrence] = useState<VaccineOccurrence | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isDaySheetOpen, setIsDaySheetOpen] = useState(false);
+  const [isSeriesDialogOpen, setIsSeriesDialogOpen] = useState(false);
   const [editingVaccine, setEditingVaccine] = useState<Vaccine | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedDog, setSelectedDog] = useState<Dog | null>(null);
+  const [formInitialDate, setFormInitialDate] = useState<string | undefined>(undefined);
 
   // Load selected dog from localStorage
   useEffect(() => {
@@ -38,6 +44,15 @@ export default function Calendar() {
   }, []);
 
   const { vaccines, isLoading, createVaccine, updateVaccine, deleteVaccine } = useVaccines(selectedDog?.id ?? null);
+
+  // Calculate all vaccine occurrences (including repeating)
+  const allOccurrences = useMemo(() => calculateVaccineOccurrences(vaccines), [vaccines]);
+
+  // Get occurrences for the selected day
+  const selectedDayOccurrences = useMemo(() => {
+    if (!selectedDate) return [];
+    return getOccurrencesForDay(allOccurrences, selectedDate);
+  }, [allOccurrences, selectedDate]);
 
   const handleSelectDog = (dog: Dog) => {
     setSelectedDog(dog);
@@ -54,14 +69,48 @@ export default function Calendar() {
     setIsDaySheetOpen(true);
   };
 
-  const handleVaccineClick = (vaccine: Vaccine) => {
-    setSelectedVaccine(vaccine);
+  const handleVaccineClick = (occurrence: VaccineOccurrence) => {
+    setSelectedVaccine(occurrence.vaccine);
+    setSelectedOccurrence(occurrence);
     setIsDetailOpen(true);
   };
 
   const handleEditVaccine = () => {
+    if (!selectedVaccine || !selectedOccurrence) return;
+    
+    // If the vaccine is repeatable and this is not the original occurrence, ask what to edit
+    if (selectedVaccine.is_repeatable && !selectedOccurrence.isOriginal) {
+      setIsDetailOpen(false);
+      setIsSeriesDialogOpen(true);
+    } else {
+      // Edit the original/single vaccine
+      setEditingVaccine(selectedVaccine);
+      setIsDetailOpen(false);
+      setIsFormOpen(true);
+    }
+  };
+
+  const handleEditSeries = () => {
+    // Edit the original vaccine (affects all future occurrences)
     setEditingVaccine(selectedVaccine);
-    setIsDetailOpen(false);
+    setIsSeriesDialogOpen(false);
+    setIsFormOpen(true);
+  };
+
+  const handleEditSingle = () => {
+    // Create a new non-repeatable vaccine for this specific date
+    if (selectedOccurrence) {
+      setFormInitialDate(format(selectedOccurrence.occurrenceDate, 'yyyy-MM-dd'));
+      setEditingVaccine({
+        ...selectedVaccine!,
+        id: '', // New vaccine
+        date: format(selectedOccurrence.occurrenceDate, 'yyyy-MM-dd'),
+        is_repeatable: false,
+        periodicity: null,
+        periodicity_unit: null,
+      });
+    }
+    setIsSeriesDialogOpen(false);
     setIsFormOpen(true);
   };
 
@@ -70,22 +119,33 @@ export default function Calendar() {
       deleteVaccine.mutate(selectedVaccine.id);
       setIsDetailOpen(false);
       setSelectedVaccine(null);
+      setSelectedOccurrence(null);
     }
   };
 
   const handleFormSubmit = (data: VaccineFormData) => {
-    if (editingVaccine) {
+    if (editingVaccine && editingVaccine.id) {
       updateVaccine.mutate({ id: editingVaccine.id, vaccine: data });
     } else {
       createVaccine.mutate(data);
     }
     setEditingVaccine(null);
-    setSelectedDate(undefined);
+    setFormInitialDate(undefined);
   };
 
   const handleFormClose = () => {
     setIsFormOpen(false);
     setEditingVaccine(null);
+    setFormInitialDate(undefined);
+  };
+
+  const handleAddVaccineFromDay = () => {
+    if (selectedDate) {
+      setFormInitialDate(format(selectedDate, 'yyyy-MM-dd'));
+      setEditingVaccine(null);
+      setIsDaySheetOpen(false);
+      setIsFormOpen(true);
+    }
   };
 
   // Show dog selector if no dog selected
@@ -105,7 +165,7 @@ export default function Calendar() {
       {/* Calendar Grid */}
       <CalendarGrid 
         currentDate={currentDate} 
-        vaccines={vaccines}
+        occurrences={allOccurrences}
         onDayClick={handleDayClick}
       />
 
@@ -123,7 +183,7 @@ export default function Calendar() {
         <VaccineList 
           currentDate={currentDate}
           vaccines={vaccines}
-          onVaccineClick={handleVaccineClick}
+          onVaccineClick={(vaccine) => handleVaccineClick({ vaccine, occurrenceDate: new Date(vaccine.date), isOriginal: true })}
         />
       )}
 
@@ -133,7 +193,7 @@ export default function Calendar() {
         size="fab"
         onClick={() => {
           setEditingVaccine(null);
-          setSelectedDate(undefined);
+          setFormInitialDate(undefined);
           setIsFormOpen(true);
         }}
         className="fixed bottom-6 right-6 z-20"
@@ -146,8 +206,17 @@ export default function Calendar() {
         isOpen={isDaySheetOpen}
         onClose={() => setIsDaySheetOpen(false)}
         selectedDate={selectedDate}
-        vaccines={vaccines}
+        occurrences={selectedDayOccurrences}
         onVaccineClick={handleVaccineClick}
+        onAddVaccine={handleAddVaccineFromDay}
+      />
+
+      {/* Edit Series Dialog */}
+      <EditSeriesDialog
+        isOpen={isSeriesDialogOpen}
+        onClose={() => setIsSeriesDialogOpen(false)}
+        onEditSingle={handleEditSingle}
+        onEditSeries={handleEditSeries}
       />
 
       {/* Form Sheet */}
@@ -156,6 +225,7 @@ export default function Calendar() {
         onClose={handleFormClose}
         onSubmit={handleFormSubmit}
         vaccine={editingVaccine}
+        initialDate={formInitialDate}
       />
 
       {/* Detail Sheet */}
