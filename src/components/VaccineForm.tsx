@@ -23,6 +23,7 @@ interface VaccineFormProps {
   onClose: () => void;
   onSubmit: (data: VaccineFormData) => void;
   vaccine?: Vaccine | null;
+  initialDate?: string;
 }
 
 const defaultFormData: VaccineFormData = {
@@ -36,7 +37,7 @@ const defaultFormData: VaccineFormData = {
   vaccine_type: 'other',
 };
 
-export function VaccineForm({ isOpen, onClose, onSubmit, vaccine }: VaccineFormProps) {
+export function VaccineForm({ isOpen, onClose, onSubmit, vaccine, initialDate }: VaccineFormProps) {
   const [formData, setFormData] = useState<VaccineFormData>(defaultFormData);
 
   useEffect(() => {
@@ -51,10 +52,12 @@ export function VaccineForm({ isOpen, onClose, onSubmit, vaccine }: VaccineFormP
         status: vaccine.status,
         vaccine_type: vaccine.vaccine_type,
       });
+    } else if (initialDate) {
+      setFormData({ ...defaultFormData, date: initialDate });
     } else {
       setFormData(defaultFormData);
     }
-  }, [vaccine, isOpen]);
+  }, [vaccine, initialDate, isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

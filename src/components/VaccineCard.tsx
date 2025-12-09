@@ -1,12 +1,13 @@
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Syringe, Calendar, Repeat, ChevronRight } from 'lucide-react';
+import { Calendar, Repeat, ChevronRight } from 'lucide-react';
 import { Vaccine, vaccineTypeLabels, vaccineStatusLabels, periodicityUnitLabels } from '@/types/vaccine';
 import { cn } from '@/lib/utils';
 
 interface VaccineCardProps {
   vaccine: Vaccine;
   onClick: () => void;
+  isRepeatedOccurrence?: boolean;
 }
 
 const statusColors = {
@@ -23,7 +24,7 @@ const typeColors = {
   other: 'bg-vaccine-other',
 };
 
-export function VaccineCard({ vaccine, onClick }: VaccineCardProps) {
+export function VaccineCard({ vaccine, onClick, isRepeatedOccurrence = false }: VaccineCardProps) {
   const formattedDate = format(new Date(vaccine.date), "d 'de' MMMM, yyyy", { locale: es });
 
   return (
@@ -55,7 +56,7 @@ export function VaccineCard({ vaccine, onClick }: VaccineCardProps) {
 
           {/* Footer */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-md">
                 {vaccineTypeLabels[vaccine.vaccine_type]}
               </span>
@@ -65,6 +66,12 @@ export function VaccineCard({ vaccine, onClick }: VaccineCardProps) {
                   <Repeat className="w-3 h-3" />
                   <span>Cada {vaccine.periodicity} {periodicityUnitLabels[vaccine.periodicity_unit]}</span>
                 </div>
+              )}
+
+              {isRepeatedOccurrence && (
+                <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-md">
+                  Repetición
+                </span>
               )}
             </div>
             

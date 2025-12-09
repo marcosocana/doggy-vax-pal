@@ -7,24 +7,21 @@ import {
   eachDayOfInterval, 
   format, 
   isSameMonth, 
-  isSameDay, 
   isToday,
   isPast,
   startOfDay
 } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Vaccine } from '@/types/vaccine';
 import { cn } from '@/lib/utils';
+import { VaccineOccurrence, getOccurrencesForDay } from '@/lib/vaccineOccurrences';
 
 interface CalendarGridProps {
   currentDate: Date;
-  vaccines: Vaccine[];
+  occurrences: VaccineOccurrence[];
   onDayClick: (date: Date) => void;
 }
 
-// All vaccine indicators are now red for visibility
-
-export function CalendarGrid({ currentDate, vaccines, onDayClick }: CalendarGridProps) {
+export function CalendarGrid({ currentDate, occurrences, onDayClick }: CalendarGridProps) {
   const days = useMemo(() => {
     const start = startOfWeek(startOfMonth(currentDate), { locale: es });
     const end = endOfWeek(endOfMonth(currentDate), { locale: es });
@@ -32,10 +29,6 @@ export function CalendarGrid({ currentDate, vaccines, onDayClick }: CalendarGrid
   }, [currentDate]);
 
   const weekDays = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
-
-  const getVaccinesForDay = (date: Date) => {
-    return vaccines.filter(v => isSameDay(new Date(v.date), date));
-  };
 
   return (
     <div className="px-4 py-3">
@@ -51,7 +44,7 @@ export function CalendarGrid({ currentDate, vaccines, onDayClick }: CalendarGrid
       {/* Calendar grid */}
       <div className="grid grid-cols-7 gap-1">
         {days.map((day) => {
-          const dayVaccines = getVaccinesForDay(day);
+          const dayOccurrences = getOccurrencesForDay(occurrences, day);
           const isCurrentMonth = isSameMonth(day, currentDate);
           const isTodayDate = isToday(day);
           const isPastDay = isPast(startOfDay(day)) && !isTodayDate;
@@ -64,8 +57,8 @@ export function CalendarGrid({ currentDate, vaccines, onDayClick }: CalendarGrid
                 'relative aspect-square flex flex-col items-center justify-start p-1 rounded-xl transition-all',
                 isCurrentMonth ? 'text-foreground' : 'text-muted-foreground/40',
                 isTodayDate && 'bg-primary/10 ring-2 ring-primary',
-                !isTodayDate && isCurrentMonth && dayVaccines.length > 0 && 'bg-destructive/10',
-                !isTodayDate && isCurrentMonth && dayVaccines.length === 0 && 'hover:bg-muted',
+                !isTodayDate && isCurrentMonth && dayOccurrences.length > 0 && 'bg-destructive/10',
+                !isTodayDate && isCurrentMonth && dayOccurrences.length === 0 && 'hover:bg-muted',
                 isPastDay && isCurrentMonth && 'opacity-40',
               )}
             >
@@ -77,16 +70,16 @@ export function CalendarGrid({ currentDate, vaccines, onDayClick }: CalendarGrid
               </span>
               
               {/* Vaccine indicators - red and prominent */}
-              {dayVaccines.length > 0 && (
+              {dayOccurrences.length > 0 && (
                 <div className="flex flex-wrap gap-0.5 justify-center mt-0.5">
-                  {dayVaccines.slice(0, 3).map((vaccine) => (
+                  {dayOccurrences.slice(0, 3).map((occ, index) => (
                     <div
-                      key={vaccine.id}
+                      key={`${occ.vaccine.id}-${index}`}
                       className="w-2.5 h-2.5 rounded-full shadow-md ring-1 ring-white/50 animate-pulse bg-destructive"
                     />
                   ))}
-                  {dayVaccines.length > 3 && (
-                    <span className="text-[8px] font-bold text-destructive">+{dayVaccines.length - 3}</span>
+                  {dayOccurrences.length > 3 && (
+                    <span className="text-[8px] font-bold text-destructive">+{dayOccurrences.length - 3}</span>
                   )}
                 </div>
               )}
