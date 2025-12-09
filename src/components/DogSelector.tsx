@@ -133,9 +133,9 @@ export function DogSelector({ onSelectDog }: DogSelectorProps) {
   // Password entry screen
   if (selectedDogForPassword) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 sm:p-6 safe-area-inset">
         <div className="text-center mb-8 animate-fade-in">
-          <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden bg-primary/10 shadow-glow">
+          <div className="w-28 h-28 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden bg-primary/10 shadow-glow">
             {selectedDogForPassword.photo_url ? (
               <img 
                 src={selectedDogForPassword.photo_url} 
@@ -143,11 +143,11 @@ export function DogSelector({ onSelectDog }: DogSelectorProps) {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <DogIcon className="w-12 h-12 text-primary" />
+              <DogIcon className="w-14 h-14 sm:w-12 sm:h-12 text-primary" />
             )}
           </div>
-          <h1 className="text-2xl font-bold text-foreground">{selectedDogForPassword.name}</h1>
-          <p className="text-muted-foreground mt-1">Introduce la contraseña</p>
+          <h1 className="text-2xl sm:text-2xl font-bold text-foreground">{selectedDogForPassword.name}</h1>
+          <p className="text-muted-foreground mt-1 text-base">Introduce la contraseña</p>
         </div>
 
         <div className="w-full max-w-xs space-y-6 animate-slide-up">
@@ -174,17 +174,18 @@ export function DogSelector({ onSelectDog }: DogSelectorProps) {
               inputMode="numeric"
             >
               <InputOTPGroup>
-                <InputOTPSlot index={0} className="w-14 h-14 text-2xl" />
-                <InputOTPSlot index={1} className="w-14 h-14 text-2xl" />
-                <InputOTPSlot index={2} className="w-14 h-14 text-2xl" />
-                <InputOTPSlot index={3} className="w-14 h-14 text-2xl" />
+                <InputOTPSlot index={0} className="w-16 h-16 sm:w-14 sm:h-14 text-2xl" />
+                <InputOTPSlot index={1} className="w-16 h-16 sm:w-14 sm:h-14 text-2xl" />
+                <InputOTPSlot index={2} className="w-16 h-16 sm:w-14 sm:h-14 text-2xl" />
+                <InputOTPSlot index={3} className="w-16 h-16 sm:w-14 sm:h-14 text-2xl" />
               </InputOTPGroup>
             </InputOTP>
           </div>
 
           <Button
             variant="secondary"
-            className="w-full"
+            size="lg"
+            className="w-full h-12 text-base touch-manipulation"
             onClick={() => {
               setSelectedDogForPassword(null);
               setEnteredPassword('');
@@ -198,25 +199,25 @@ export function DogSelector({ onSelectDog }: DogSelectorProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 sm:p-6 safe-area-inset">
       {/* Header */}
-      <div className="text-center mb-8 animate-fade-in">
+      <div className="text-center mb-6 sm:mb-8 animate-fade-in">
         <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-glow">
           <DogIcon className="w-10 h-10 text-primary" />
         </div>
         <h1 className="text-2xl font-bold text-foreground">VacunasPet</h1>
-        <p className="text-muted-foreground mt-1">Elige o crea tu perrito</p>
+        <p className="text-muted-foreground mt-1 text-base">Elige o crea tu perrito</p>
       </div>
 
       {/* Dog List */}
       <div className="w-full max-w-sm space-y-3 animate-slide-up">
         {isLoading ? (
-          <div className="text-center py-8 text-muted-foreground">Cargando...</div>
+          <div className="text-center py-8 text-muted-foreground text-base">Cargando...</div>
         ) : dogs.length === 0 && !showCreateForm ? (
           <div className="text-center py-8">
-            <p className="text-muted-foreground mb-4">No hay perritos aún</p>
-            <Button onClick={() => setShowCreateForm(true)}>
-              <Plus className="w-4 h-4 mr-2" />
+            <p className="text-muted-foreground mb-5 text-base">No hay perritos aún</p>
+            <Button onClick={() => setShowCreateForm(true)} size="lg" className="h-12 px-6 touch-manipulation">
+              <Plus className="w-5 h-5 mr-2" />
               Crear mi primer perrito
             </Button>
           </div>
@@ -225,14 +226,14 @@ export function DogSelector({ onSelectDog }: DogSelectorProps) {
             {dogs.map((dog, idx) => (
               <div
                 key={dog.id}
-                className="flex items-center gap-3 animate-fade-in"
+                className="flex items-center gap-2 sm:gap-3 animate-fade-in"
                 style={{ animationDelay: `${idx * 50}ms` }}
               >
                 <button
                   onClick={() => handleDogClick(dog)}
-                  className="flex-1 flex items-center gap-3 p-4 bg-card rounded-xl border border-border/50 shadow-soft hover:shadow-glow hover:border-primary/30 transition-all text-left group"
+                  className="flex-1 flex items-center gap-3 p-4 bg-card rounded-xl border border-border/50 shadow-soft active:shadow-glow active:border-primary/30 transition-all text-left group min-h-[72px] touch-manipulation"
                 >
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden bg-primary/10">
+                  <div className="w-14 h-14 sm:w-12 sm:h-12 rounded-full flex items-center justify-center overflow-hidden bg-primary/10 flex-shrink-0">
                     {dog.photo_url ? (
                       <img 
                         src={dog.photo_url} 
@@ -240,16 +241,16 @@ export function DogSelector({ onSelectDog }: DogSelectorProps) {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <DogIcon className="w-6 h-6 text-primary" />
+                      <DogIcon className="w-7 h-7 sm:w-6 sm:h-6 text-primary" />
                     )}
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
-                      {dog.name}
-                      <Lock className="w-3 h-3 text-muted-foreground" />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-foreground group-active:text-primary transition-colors flex items-center gap-2 text-base">
+                      <span className="truncate">{dog.name}</span>
+                      <Lock className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
                     </h3>
                     {dog.birth_date && (
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-sm text-muted-foreground">
                         Nacido: {new Date(dog.birth_date).toLocaleDateString('es-ES')}
                       </p>
                     )}
@@ -258,20 +259,20 @@ export function DogSelector({ onSelectDog }: DogSelectorProps) {
                 
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
-                      <Trash2 className="w-4 h-4" />
+                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive h-12 w-12 min-w-[48px] touch-manipulation">
+                      <Trash2 className="w-5 h-5" />
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent>
+                  <AlertDialogContent className="mx-4 max-w-[calc(100vw-2rem)]">
                     <AlertDialogHeader>
                       <AlertDialogTitle>¿Eliminar a {dog.name}?</AlertDialogTitle>
-                      <AlertDialogDescription>
+                      <AlertDialogDescription className="text-base">
                         Se eliminarán todas sus vacunas. Esta acción no se puede deshacer.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleDeleteDog(dog.id)}>Eliminar</AlertDialogAction>
+                    <AlertDialogFooter className="gap-2 sm:gap-0">
+                      <AlertDialogCancel className="h-12 text-base">Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDeleteDog(dog.id)} className="h-12 text-base">Eliminar</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
@@ -281,10 +282,11 @@ export function DogSelector({ onSelectDog }: DogSelectorProps) {
             {!showCreateForm && (
               <Button
                 variant="outline"
-                className="w-full mt-4"
+                size="lg"
+                className="w-full mt-4 h-12 text-base touch-manipulation"
                 onClick={() => setShowCreateForm(true)}
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-5 h-5 mr-2" />
                 Añadir otro perrito
               </Button>
             )}
@@ -293,7 +295,7 @@ export function DogSelector({ onSelectDog }: DogSelectorProps) {
 
         {/* Create Form */}
         {showCreateForm && (
-          <form onSubmit={handleCreateDog} className="bg-card rounded-xl p-5 border border-border/50 shadow-soft space-y-4 animate-scale-in">
+          <form onSubmit={handleCreateDog} className="bg-card rounded-xl p-4 sm:p-5 border border-border/50 shadow-soft space-y-4 animate-scale-in">
             <h3 className="font-bold text-lg">Nuevo perrito</h3>
             
             {/* Photo upload */}
@@ -308,18 +310,18 @@ export function DogSelector({ onSelectDog }: DogSelectorProps) {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-24 h-24 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-dashed border-border hover:border-primary transition-colors"
+                className="w-28 h-28 sm:w-24 sm:h-24 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-dashed border-border active:border-primary transition-colors touch-manipulation"
               >
                 {photoPreview ? (
                   <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
                 ) : (
-                  <Camera className="w-8 h-8 text-muted-foreground" />
+                  <Camera className="w-10 h-10 sm:w-8 sm:h-8 text-muted-foreground" />
                 )}
               </button>
             </div>
-            <p className="text-center text-xs text-muted-foreground">Toca para añadir foto</p>
+            <p className="text-center text-sm text-muted-foreground">Toca para añadir foto</p>
             
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="dogName" className="text-sm font-semibold">Nombre *</Label>
               <Input
                 id="dogName"
@@ -328,18 +330,18 @@ export function DogSelector({ onSelectDog }: DogSelectorProps) {
                 placeholder="¿Cómo se llama?"
                 required
                 autoFocus
-                className="h-12"
+                className="h-12 text-base"
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="dogBirth" className="text-sm font-semibold">Fecha de nacimiento</Label>
               <Input
                 id="dogBirth"
                 type="date"
                 value={newDogBirthDate}
                 onChange={(e) => setNewDogBirthDate(e.target.value)}
-                className="h-12"
+                className="h-12 text-base"
               />
             </div>
 
@@ -354,27 +356,29 @@ export function DogSelector({ onSelectDog }: DogSelectorProps) {
                   inputMode="numeric"
                 >
                   <InputOTPGroup>
-                    <InputOTPSlot index={0} className="w-12 h-12 text-xl" />
-                    <InputOTPSlot index={1} className="w-12 h-12 text-xl" />
-                    <InputOTPSlot index={2} className="w-12 h-12 text-xl" />
-                    <InputOTPSlot index={3} className="w-12 h-12 text-xl" />
+                    <InputOTPSlot index={0} className="w-14 h-14 sm:w-12 sm:h-12 text-xl" />
+                    <InputOTPSlot index={1} className="w-14 h-14 sm:w-12 sm:h-12 text-xl" />
+                    <InputOTPSlot index={2} className="w-14 h-14 sm:w-12 sm:h-12 text-xl" />
+                    <InputOTPSlot index={3} className="w-14 h-14 sm:w-12 sm:h-12 text-xl" />
                   </InputOTPGroup>
                 </InputOTP>
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 pt-2">
               <Button
                 type="button"
                 variant="secondary"
-                className="flex-1"
+                size="lg"
+                className="flex-1 h-12 text-base touch-manipulation"
                 onClick={resetForm}
               >
                 Cancelar
               </Button>
               <Button 
                 type="submit" 
-                className="flex-1" 
+                size="lg"
+                className="flex-1 h-12 text-base touch-manipulation" 
                 disabled={createDog.isPending || isUploading || newDogPassword.length !== 4}
               >
                 {createDog.isPending || isUploading ? 'Creando...' : 'Crear'}
